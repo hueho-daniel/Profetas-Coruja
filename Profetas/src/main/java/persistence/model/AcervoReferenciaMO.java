@@ -1,36 +1,37 @@
 package persistence.model;
 
+import org.hibernate.validator.constraints.NotEmpty;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-
-import org.hibernate.validator.constraints.NotEmpty;
+import java.io.Serializable;
 
 @Entity
-public class AcervoReferenciaMO implements EntityModel {
+public class AcervoReferenciaMO implements EntityModel, Serializable {
 
-	@Id
-	@GeneratedValue
-	public Long id;
+    @Id
+    @GeneratedValue
+    private Long id;
 
-	@NotEmpty
-	public String nome;
+    @NotEmpty
+    private String nome;
 
-	@Override
-	public Long getId() {
-		return null;
-	}
+    @Override
+    public Long getId() {
+        return null;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public String getNome() {
-		return nome;
-	}
+    public String getNome() {
+        return nome;
+    }
 
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
 }
