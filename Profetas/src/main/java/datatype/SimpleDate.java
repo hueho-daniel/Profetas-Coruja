@@ -1,210 +1,110 @@
 package datatype;
 
+import com.google.common.base.Objects;
+import org.joda.time.LocalDate;
+
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
-public final class SimpleDate implements Serializable{
-	
-	/*
-	 * Seção pública
-	 */
+public final class SimpleDate implements Serializable {
 
-	public final static short TRACKS_ONLY_YEAR = 1;
-	public final static short TRACKS_YEAR_AND_MONTH = 2;
-	public final static short TRACKS_FULL_DATE = 3;
-		
-	public SimpleDate(short year, short month, short day) {
-		this(year, month, day, TRACKS_FULL_DATE);
-	}
-	
-	public SimpleDate(short year, short month) {
-		this(year, month, NOT_DEFINED, TRACKS_YEAR_AND_MONTH);
-	}
-	
-	public SimpleDate(short year) {
-		this(year, NOT_DEFINED, NOT_DEFINED, TRACKS_ONLY_YEAR);
-	}
-	
-	public String format() {
-		String result = null;
-		switch (dateMode) {
-		case TRACKS_FULL_DATE:
-			result = strYear(year) + "/" + str(month) + "/" + str(day);
-			break;
-			
-		case TRACKS_YEAR_AND_MONTH:
-			result = strYear(year) + "/" + str(month);
-			break;
-			
-		case TRACKS_ONLY_YEAR:
-			result = strYear(year);
-			break;
+    public final static int TRACKS_ONLY_YEAR = 1;
+    public final static int TRACKS_YEAR_AND_MONTH = 2;
+    public final static int TRACKS_FULL_DATE = 3;
 
-		default:
-			break;
-		}
-		return result;
-	}
-	
-	public short tracks() {
-		return dateMode;
-	}
-	
-	public short getYear() {
-		return year;
-	}
-	
-	public short getMonth() {
-		if(dateMode == TRACKS_ONLY_YEAR) {
-			throw new IllegalAccessError("Instance doesn't track month");
-		} else {
-			return month;
-		}
-	}
-	
-	public short getDay() {
-		if(dateMode == TRACKS_ONLY_YEAR || dateMode == TRACKS_YEAR_AND_MONTH) {
-			throw new IllegalAccessError("Instance doesn't track days");
-		} else {
-			return day;
-		}
-	}
-	
-	public static SimpleDate parse(String strDate) throws IllegalArgumentException {
-		String[] parts = strDate.split("/");
-		if(parts.length == 1) {
-			short year = Short.parseShort(parts[0]);
-			if(year < 0 || year > 9999) throw new IllegalArgumentException("Invalid format for string (YYYY)");
-			else return new SimpleDate(year);
-		}
-		else if(parts.length == 2) {
-			short year = Short.parseShort(parts[0]);
-			short month = Short.parseShort(parts[1]);
-			if((year < 0 || year > 9999) && (month < 1 || month > 12)) throw new IllegalArgumentException("Invalid format for string (YYYY-MM)");
-			else return new SimpleDate(year, month);
-		}
-		else if(parts.length == 3) {
-			short year = Short.parseShort(parts[0]);
-			short month = Short.parseShort(parts[1]);
-			short day = Short.parseShort(parts[2]);
-			if((year < 0 || year > 9999) && (month < 1 || month > 12) && (day < 1 || day > 31)) throw new IllegalArgumentException("Invalid format for string (YYYY-MM-DD)");
-			else return new SimpleDate(year, month, day);
-		}
-		else {
-			throw new IllegalArgumentException("Invalid format for string (YYYY[-MM[-DD]]");
-		}
-		
-	}
-	
-	public static SimpleDate getToday() {
-		return parse(sdf.format(new Date()));
-	}
-	
-	public boolean equals(Object anObject) {
-		if(!(anObject instanceof SimpleDate)){
-			return false;
-		}
-		else if(this == anObject) {
-			return true;
-		}
-		else {
-			SimpleDate aDate = (SimpleDate) anObject;
-			if(aDate.tracks() != dateMode) return false;
-			
-			if(dateMode == TRACKS_ONLY_YEAR)
-				return (aDate.year == this.year);
-			else if(dateMode == TRACKS_YEAR_AND_MONTH)
-				return (aDate.year == this.year && aDate.month == this.month);
-			else if(dateMode == TRACKS_FULL_DATE)
-				return (aDate.year == this.year && aDate.month == this.month && aDate.day == this.day);
-			else
-				throw new RuntimeException("dateMode in SimpleDate instance is invalid");
-		}
-	}
-	
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + dateMode;
-		result = prime * result + day;
-		result = prime * result + month;
-		result = prime * result + year;
-		return result;
-	}
-	
-	public String toString() {
-		return format();
-	}
-	
-	/*
-	 * Sessão privada
-	 */
-	
-	private static final long serialVersionUID = 8790883863690026543L;
-	
-	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-	
-	private final short year;
-	private final short month;
-	private final short day;
-	private final short dateMode;
-	
-	private final static short NOT_DEFINED = 0;
-	
-	private boolean isShortMonth(short month) {
-		return (month == 4 || month == 6 || month == 9 || month == 11);
-	}
-	
-	private boolean isFebruary(short month) {
-		return (month == 2);
-	}
-	
-	private boolean isLeapYear(short year) {
-		return (year % 4 == 0);
-	}
-	
-	private String str(short s) {
-		return String.format("%02d", s);
-	}
-	private String strYear(short s) {
-		return String.format("%04d", s);
-	}
-	
-	private SimpleDate(short year, short month, short day, short dateMode) {
-		boolean suceed = false;
-		if((year >= 0 && year <= 9999)) {
-			if(isShortMonth(month)) {
-				if((day >= 0) && (day <= 30)) {
-					suceed = true;
-				}
-			}
-			else if(isFebruary(month)) {
-				if(isLeapYear(year)) {
-					if((day >= 0) && (day <= 29)) {
-						suceed = true;
-					}
-				}
-				else {
-					if((day >= 0) && (day <= 28)) {
-						suceed = true;
-					}
-				}
-			}
-			else if(month >= 0 && month <= 12) {
-				if((day >= 0) && (day <= 31)) {
-					suceed = true;
-				}
-			}
-		}
-		
-		if(suceed) {
-			this.year = year;
-			this.month = month;
-			this.day = day;
-			this.dateMode = dateMode;
-		}
-		else throw new IllegalArgumentException("Invalid values");
-	}
+    private final LocalDate delegate;
+
+    public SimpleDate(int year, int month, int day) {
+        this(year, month, day, TRACKS_FULL_DATE);
+    }
+
+    public SimpleDate(int year, int month) {
+        this(year, month, NOT_DEFINED, TRACKS_YEAR_AND_MONTH);
+    }
+
+    public SimpleDate(int year) {
+        this(year, NOT_DEFINED, NOT_DEFINED, TRACKS_ONLY_YEAR);
+    }
+
+    public String format() {
+        switch (dateMode) {
+            case TRACKS_FULL_DATE:
+                return delegate.toString("yyyy-MM-dd");
+            case TRACKS_YEAR_AND_MONTH:
+                return delegate.toString("yyyy-MM");
+            case TRACKS_ONLY_YEAR:
+                return delegate.toString("yyyy");
+            default:
+                throw new RuntimeException("Bad-formed or corrupted instance of SimpleDate");
+        }
+    }
+
+    public int tracks() {
+        return dateMode;
+    }
+
+    public int getYear() {
+        return delegate.getYear();
+    }
+
+    public int getMonth() {
+        if (dateMode == TRACKS_ONLY_YEAR) {
+            throw new IllegalAccessError("Instance doesn't track month");
+        } else {
+            return delegate.getMonthOfYear();
+        }
+    }
+
+    public int getDay() {
+        if (dateMode == TRACKS_ONLY_YEAR || dateMode == TRACKS_YEAR_AND_MONTH) {
+            throw new IllegalAccessError("Instance doesn't track days");
+        } else {
+            return delegate.getDayOfMonth();
+        }
+    }
+
+    public static SimpleDate parse(String strDate) throws IllegalArgumentException {
+        return new SimpleDate(LocalDate.parse(strDate));
+    }
+
+    public static SimpleDate getToday() {
+        return new SimpleDate(LocalDate.now());
+    }
+
+    public boolean equals(Object anObject) {
+        if (this == anObject) {
+            return true;
+        } else if (anObject instanceof SimpleDate) {
+            SimpleDate aDate = (SimpleDate) anObject;
+            return this.tracks() == aDate.tracks() && this.delegate.equals(aDate.delegate);
+        }
+        return false;
+    }
+
+    public int hashCode() {
+        return Objects.hashCode(this.dateMode, this.delegate);
+    }
+
+    public String toString() {
+        return format();
+    }
+
+    /*
+     * Sessão privada
+     */
+    private static final long serialVersionUID = 8790883863690026543L;
+
+    private final int dateMode;
+
+    private final static short NOT_DEFINED = 1;
+
+    private SimpleDate(int year, int month, int day, int dateMode) {
+        this.delegate = new LocalDate(year, month, day);
+        this.dateMode = dateMode;
+    }
+
+    private SimpleDate(LocalDate date) {
+        this.dateMode = TRACKS_FULL_DATE;
+        this.delegate = date;
+    }
 
 }
